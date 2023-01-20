@@ -189,6 +189,8 @@ async def handle_ssbq(player: Player):
             except Exception as e:
                 logger.info('原神体力', '➤➤', {'用户': player.user_id, 'UID': player.uid}, f'绘制图片失败，{e}', False)
                 return f'{player.uid}绘制图片失败，{e}'
+        else:
+            return f'{player.uid}无法越过验证码'
     elif data['retcode'] != 0:
         logger.info('原神体力', '➤', {'用户': player.user_id, 'UID': player.uid},
                     f'获取数据失败，code为{data["retcode"]}， msg为{data["message"]}', False)
