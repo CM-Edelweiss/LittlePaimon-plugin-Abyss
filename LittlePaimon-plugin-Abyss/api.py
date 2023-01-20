@@ -62,7 +62,7 @@ def get_validate(gt: str, challenge: str, referer: str):
     logger.info(data['msg'])
     validate =data['data']['validate']
     challenge =data['data']['challenge']
-    return validate,challenge  # 失败返回None 成功返回validate
+    return validate,challenge  # 失败返回'j' 成功返回validate
 
 async def get_pass_challenge(uid: str,user_id: str):
     cookie_info = await get_cookie(user_id, uid, True, True)
@@ -87,7 +87,7 @@ async def get_pass_challenge(uid: str,user_id: str):
     validate,_ = get_validate(data["data"]["gt"], data["data"]["challenge"],
                     "https://webstatic.mihoyo.com/bbs/event/signin-ys/index.html?bbs_auth_required=true&act_id"
                     "=e202009291139501&utm_source=bbs&utm_medium=mys&utm_campaign=icon")
-    if validate is not None:
+    if validate != 'j':
         check_req = http.post(url=bbs_captcha_verify, headers=headers,
                                 json={"geetest_challenge": data["data"]["challenge"],
                                     "geetest_seccode": validate+"|jordan",
@@ -111,11 +111,10 @@ _HEADER = {
 
 
 
-async def get_sign_info(user_id: str, uid: str) -> Union[dict, str]:
-    cookie_info = await PrivateCookie.get_or_none(user_id=user_id, uid=uid)
+async def get_sign_info(user_id: str, uid: str,cookie:str) -> Union[dict, str]:
     server_id = 'cn_qd01' if uid[0] == '5' else 'cn_gf01'
     HEADER = copy.deepcopy(_HEADER)
-    HEADER['Cookie'] = cookie_info.cookie
+    HEADER['Cookie'] = cookie
     req = http.get(url=SIGN_INFO_URL, headers=HEADER,
                     params={"act_id": 'e202009291139501', 'region': server_id,'uid': uid})
     data = req.json()
@@ -134,7 +133,8 @@ def old_version_get_ds_token(mysbbs=False):
     return i + ',' + r + ',' + c
 
 async def mihoyo_bbs_sign(user_id: str, uid: str,Header={}) -> Union[dict, str]:
-    cookie_info = await PrivateCookie.get_or_none(user_id=user_id, uid=uid)
+    #cookie_info = await PrivateCookie.get_or_none(user_id=user_id, uid=uid)
+    cookie_info = await get_cookie(user_id, uid, True, True)
     server_id = 'cn_qd01' if uid[0] == '5' else 'cn_gf01'
     HEADER = copy.deepcopy(_HEADER)
     HEADER['User_Agent'] = (

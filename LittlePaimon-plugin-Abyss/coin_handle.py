@@ -11,7 +11,7 @@ from .config import myb_enable,myb_hour,myb_minute
 from LittlePaimon.database import PrivateCookie, MihoyoBBSSub, LastQuery
 from LittlePaimon.utils import logger, scheduler
 from LittlePaimon.utils.requests import aiorequests
-from LittlePaimon.utils.api import random_text, random_hex, get_old_version_ds, get_ds
+from LittlePaimon.utils.api import random_text, random_hex, get_old_version_ds, get_ds,get_cookie
 from .api import get_pass_challenge,query_score
 
 # 米游社的API列表
@@ -324,7 +324,8 @@ async def mhy_bbs_coin(user_id: str, uid: str) -> str:
     :param uid: 原神uid
     :return: 结果
     """
-    cookie = await PrivateCookie.get_or_none(user_id=user_id, uid=uid)
+    #cookie = await PrivateCookie.get_or_none(user_id=user_id, uid=uid)
+    cookie = await get_cookie(user_id, uid, True, True)
     if not cookie:
         return '你尚未绑定Cookie和Stoken，请先用ysb指令绑定！'
     elif cookie.stoken is None:

@@ -8,7 +8,7 @@ from LittlePaimon.database import MihoyoBBSSub,Player,PrivateCookie
 from .config import auto_sign_enable,auto_sign_hour,auto_sign_minute
 from LittlePaimon.utils import logger, scheduler
 from LittlePaimon.plugins.Paimon_DailyNote.draw import draw_daily_note_card
-from LittlePaimon.utils.api import get_mihoyo_private_data,get_ds
+from LittlePaimon.utils.api import get_mihoyo_private_data,get_ds,get_cookie
 from LittlePaimon.utils.requests import aiorequests
 
 already = 0
@@ -16,8 +16,11 @@ already = 0
 # 签到函数
 async def sign_in(user_id,uid) -> str:
     logger.info(f'[签到] {uid} 开始执行签到')
+    cookie = await get_cookie(user_id, uid, True, True)
+    if not cookie:
+        return False ,'未绑定私人cookies，绑定方法二选一：\n1.通过米游社扫码绑定：\n请发送指令[原神扫码绑定]\n2.获取cookies的教程：\ndocs.qq.com/doc/DQ3JLWk1vQVllZ2Z1\n获取后，使用[ysb cookie]指令绑定'
     # 获得签到信息
-    sign_info = await get_sign_info(user_id,uid)
+    sign_info = await get_sign_info(user_id,uid,cookie.cookie)
     # 获取签到列表
     sign_list = await get_sign_list()
     # 初步校验数据
@@ -169,7 +172,8 @@ async def handle_ssbq(player: Player):
         logger.info('原神体力', '➤', {'用户': player.user_id, 'UID': player.uid},'成功获取challenge', True)
         if challenge is not None:
             server_id = 'cn_qd01' if player.uid[0] == '5' else 'cn_gf01'
-            cookie_info = await PrivateCookie.get_or_none(user_id=player.user_id, uid=player.uid)
+            #cookie_info = await PrivateCookie.get_or_none(user_id=player.user_id, uid=player.uid)
+            cookie_info = await get_cookie(player.user_id, player.uid, True, True)
             res = await aiorequests.get(url=DAILY_NOTE_API,
                                     headers=mihoyo_headers(q=f'role_id={player.uid}&server={server_id}',
                                                         cookie=cookie_info.cookie,challenge=challenge),
