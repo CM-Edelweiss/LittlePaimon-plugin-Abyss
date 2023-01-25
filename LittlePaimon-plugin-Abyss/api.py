@@ -41,7 +41,7 @@ def query_score():
 
 def vaapigt(gt: str, challenge: str,referer: str):
     """validate,challenge"""
-    response = http.post(vaapi + 
+    response = http.get(vaapi + 
                          f'gt={gt}&challenge={challenge}',
                         timeout=60)
     data = response.json()
