@@ -12,6 +12,7 @@ class Config(BaseModel, extra=Extra.ignore):
     myb_minute: int = 5#分
     appkey: str = '?'
     whitelist:list = []
+    vaapi: str = ''
 
 plugin_config = Config.parse_obj(get_driver().config)
 
@@ -23,3 +24,4 @@ myb_hour = plugin_config.myb_hour
 myb_minute = plugin_config.myb_minute
 key = plugin_config.appkey
 bai = plugin_config.whitelist
+vaapi = plugin_config.vaapi

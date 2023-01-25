@@ -15,6 +15,8 @@
 
 代码没有经过充分测试，可能有亿点问题，有问题请提issues
 
+vaapi应该是http://...?..=..&或者http://...?
+
 ## 丨📖 使用
 把`LittlePaimon-plugin-Abyss`文件夹放在`LittlePaimon\LittlePaimon\plugins\`里
 
@@ -32,6 +34,7 @@
 | myb_minute | 否 | 5 | 分 |
 | appkey | 是 | ? | 人人图像打码的key |
 | whitelist | 是 | [] | 可使用的群 |
+| vaapi | 否 | 空 | 使用别的接码 |
 
 ## 丨💸鸣谢
 - [LittlePaimon](https://github.com/CMHopeSunshine/LittlePaimon)实时便签和米游币获取代码（~~直接开抄~~）

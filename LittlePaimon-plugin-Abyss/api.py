@@ -8,7 +8,7 @@ from LittlePaimon.database import PrivateCookie
 from typing import Union
 from LittlePaimon.utils.api import md5,get_cookie,random_text, random_hex, get_old_version_ds
 import httpx
-from .config import key
+from .config import key,vaapi
 
 
 http = httpx.Client(timeout=20, transport=httpx.HTTPTransport(retries=10))
@@ -39,7 +39,23 @@ def query_score():
     logger.info('积分还剩' + integral)
     return False,f'积分还剩{integral}'
 
-def get_validate(gt: str, challenge: str, referer: str):
+def vaapigt(gt: str, challenge: str,referer: str):
+    """validate,challenge"""
+    response = http.post(vaapi + 
+                         f'gt={gt}&challenge={challenge}',
+                        timeout=60)
+    data = response.json()
+    if 'data' in data and 'validate' in data['data']:
+        logger.info('[第三方]成功')
+        validate =data['data']['validate']
+        challenge =data['data']['challenge']
+        return validate,challenge
+    else:
+        logger.info('[第三方]失败')
+        validate,challenge = rrocr(gt, challenge, referer)
+        return validate,challenge  # 失败返回'j' 成功返回validate
+
+def rrocr(gt: str, challenge: str, referer: str):
     """validate,challenge"""
     jifen,_ = query_score()
     if jifen:
@@ -51,19 +67,27 @@ def get_validate(gt: str, challenge: str, referer: str):
         'gt': gt,
         'challenge': challenge,
         'referer': referer,
-        'sharecode': '585dee4d4ef94e1cb95d5362a158ea54'
+        'sharecode': 'a83baa99828342ccac180b19217e2a93'#？不明
     }, timeout=60)
     data = response.json()
-    if data['status'] != 0:
-        logger.info(data['msg'])  # 打码失败输出错误信息
+    if 'data' in data and 'validate' in data['data']:
+        logger.info(data['msg'])  
+        validate =data['data']['validate']
+        challenge =data['data']['challenge']
+        return validate,challenge
+    else:
+        logger.info(data['msg'])# 打码失败输出错误信息,返回'j'
         validate="j"
         challenge ="j"
-        return validate,challenge 
-    logger.info(data['msg'])
-    validate =data['data']['validate']
-    challenge =data['data']['challenge']
-    return validate,challenge  # 失败返回'j' 成功返回validate
+        return validate,challenge  # 失败返回'j' 成功返回validate
 
+def get_validate(gt: str, challenge: str, referer: str):
+    if vaapi:
+        validate,challenge = vaapigt(gt, challenge, referer)   
+    else:
+        validate,challenge = rrocr(gt, challenge, referer)
+    return validate,challenge  # 失败返回'j' 成功返回validate
+    
 async def get_pass_challenge(uid: str,user_id: str):
     cookie_info = await get_cookie(user_id, uid, True, True)
     headers = {
