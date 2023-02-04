@@ -5,12 +5,28 @@ from LittlePaimon.utils.message import CommandUID, CommandSwitch, CommandPlayer
 from typing import Union
 from nonebot.permission import SUPERUSER
 from nonebot.rule import to_me
+from nonebot.plugin import PluginMetadata
 from .sign_handle import sign_in,handle_ssbq
 from LittlePaimon.database import PrivateCookie,MihoyoBBSSub
 from .sign_handle import bbs_auto_sign
 from nonebot.typing import T_State
 from .coin_handle import mhy_bbs_coin, bbs_auto_coin
-from .config import bai
+from .config import config
+
+from . import web_page,web_api
+
+__plugin_meta__ = PluginMetadata(
+    name='原神加强签到',
+    description='原神加强签到',
+    usage='原神加强签到',
+    extra={
+        'author':   'Edelweiss',
+        'version':  '1.0',
+        'priority': 7,
+    }
+)
+
+
 sign = on_command('验证签到', priority=8, block=True, state={
         'pm_name':        '验证签到',
         'pm_description': '*执行米游社签到操作',
@@ -22,7 +38,7 @@ sign = on_command('验证签到', priority=8, block=True, state={
 all_sign = on_command('全部验证重签', priority=8, block=True, permission=SUPERUSER, rule=to_me(), state={
         'pm_name':        '米游社验证重签',
         'pm_description': '重签全部米游社签到任务，需超级用户权限',
-        'pm_usage':       '@Bot 米游社全部重签',
+        'pm_usage':       '@Bot 全部验证重签',
         'pm_priority':    2
     })
 
@@ -47,22 +63,21 @@ all_coin = on_command('全部验证重做', priority=8, block=True, permission=S
         'pm_priority':    5
     })
 
-tili= []
-signing_list = []
-coin_getting_list = []
+
+list = []
 
 @sign.handle()
 async def _(bot:Bot,event: GroupMessageEvent, uid=CommandUID(), switch=CommandSwitch()):
-    if (str(event.group_id) in bai) or (str(event.user_id) in bot.config.superusers):
+    if (str(event.group_id) in config.whitelist) or (str(event.user_id) in config.whlist) or (str(event.user_id) in bot.config.superusers):
         if switch is None:
-            if f'{event.user_id}-{uid}' in signing_list:
-                await sign.finish('你已经在执行[验证]签到任务中，请勿重复发送', at_sender=True)
+            if f'{event.user_id}-{uid}' in list:
+                await sign.finish('你已经有验证任务了，请勿重复发送', at_sender=True)
             else:
                 await sign.send(f'开始为UID{uid}执行[验证]米游社签到，请稍等...', at_sender=True)
                 logger.info('米游社原神签到', '', {'user_id': event.user_id, 'uid': uid, '执行签到': ''})
-                signing_list.append(f'{event.user_id}-{uid}')
+                list.append(f'{event.user_id}-{uid}')
                 _, result = await sign_in(str(event.user_id), uid)
-                signing_list.remove(f'{event.user_id}-{uid}')
+                list.remove(f'{event.user_id}-{uid}')
                 await sign.finish(result, at_sender=True)
         else:
             sub_data = {
@@ -88,7 +103,7 @@ async def _(bot:Bot,event: GroupMessageEvent, uid=CommandUID(), switch=CommandSw
                 else:
                     await sign.finish(f'UID{uid}尚未开启米游社[验证]自动签到，无需关闭！', at_sender=True)               
     else:
-        await sign.finish(f"本群非白名单", at_sender=True)
+        await sign.finish(config.hfu, at_sender=True)
 
 @all_sign.handle()
 async def _(event: Union[GroupMessageEvent, PrivateMessageEvent]):
@@ -99,33 +114,33 @@ async def _(event: Union[GroupMessageEvent, PrivateMessageEvent]):
 
 @ti.handle()
 async def _(bot:Bot,event: GroupMessageEvent, state: T_State, players=CommandPlayer()):
-    if (str(event.group_id) in bai) or (str(event.user_id) in bot.config.superusers):
+    if (str(event.group_id) in config.whitelist) or (str(event.user_id) in config.whlist) or (str(event.user_id) in bot.config.superusers):
         logger.info('原神体力', '开始执行查询')
         for player in players:
-            if f'{event.user_id}-{player.uid}' in tili:
-                await sign.finish('你已经在执行体力任务中，请勿重复发送', at_sender=True)
+            if f'{event.user_id}-{player.uid}' in list:
+                await sign.finish('你已经有验证任务了，请勿重复发送', at_sender=True)
             else:
-               tili.append(f'{event.user_id}-{player.uid}')
+               list.append(f'{event.user_id}-{player.uid}')
                result = await handle_ssbq(player)
-               tili.remove(f'{event.user_id}-{player.uid}')
+               list.remove(f'{event.user_id}-{player.uid}')
         await ti.finish(result, at_sender=True)
     else:
-        await sign.finish(f"本群非白名单", at_sender=True)
+        await sign.finish(config.hfu, at_sender=True)
 
 
 @get_coin.handle()
 async def _(bot:Bot,event: GroupMessageEvent, uid=CommandUID(), switch=CommandSwitch()):
-    if (str(event.group_id) in bai) or (str(event.user_id) in bot.config.superusers):
+    if (str(event.group_id) in config.whitelist) or (str(event.user_id) in config.whlist) or (str(event.user_id) in bot.config.superusers):
         if switch is None:
             # 没有开关参数，手动执行米游币获取
-            if f'{event.user_id}-{uid}' in coin_getting_list:
-                await get_coin.finish('你已经在执行[验证]米游币获取任务中，请勿重复发送', at_sender=True)
+            if f'{event.user_id}-{uid}' in list:
+                await get_coin.finish('你已经有验证任务了，请勿重复发送', at_sender=True)
             else:
                 await get_coin.send(f'开始为UID{uid}执行[验证]米游币获取，请稍等...', at_sender=True)
                 logger.info('[验证]米游币自动获取', '', {'user_id': event.user_id, 'uid': uid, '执行获取': ''})
-                coin_getting_list.append(f'{event.user_id}-{uid}')
+                list.append(f'{event.user_id}-{uid}')
                 result = await mhy_bbs_coin(str(event.user_id), uid)
-                coin_getting_list.remove(f'{event.user_id}-{uid}')
+                list.remove(f'{event.user_id}-{uid}')
                 await get_coin.finish(result, at_sender=True)
         else:
             sub_data = {
@@ -151,7 +166,7 @@ async def _(bot:Bot,event: GroupMessageEvent, uid=CommandUID(), switch=CommandSw
                 else:
                     await sign.finish(f'UID{uid}尚未开启[验证]米游币自动获取，无需关闭！', at_sender=True)
     else:
-        await sign.finish(f"本群非白名单", at_sender=True)
+        await sign.finish(config.hfu, at_sender=True)
 
 @all_coin.handle()
 async def _(event: Union[GroupMessageEvent, PrivateMessageEvent]):

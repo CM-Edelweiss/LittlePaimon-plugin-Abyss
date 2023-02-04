@@ -7,7 +7,7 @@ from typing import Tuple
 
 from nonebot import get_bot
 
-from .config import myb_enable,myb_hour,myb_minute
+from .config import config
 from LittlePaimon.database import PrivateCookie, MihoyoBBSSub, LastQuery
 from LittlePaimon.utils import logger, scheduler
 from LittlePaimon.utils.requests import aiorequests
@@ -339,7 +339,7 @@ async def mhy_bbs_coin(user_id: str, uid: str) -> str:
     return msg if result else f'UID{uid}{msg}'
 
 
-@scheduler.scheduled_job('cron', hour=myb_hour, minute=myb_minute, misfire_grace_time=10)
+@scheduler.scheduled_job('cron', hour=config.myb_hour, minute=config.myb_minute, misfire_grace_time=10)
 async def _():
     await bbs_auto_coin()
 
@@ -348,7 +348,7 @@ async def bbs_auto_coin():
     """
     指定时间，执行所有米游币获取订阅任务， 并将结果分群绘图发送
     """
-    if not myb_enable:
+    if not config.myb:
         return
     t = time.time()
     subs = await MihoyoBBSSub.filter(sub_event='米游币验证获取').all()
@@ -365,7 +365,10 @@ async def bbs_auto_coin():
                 'uid': sub.uid,
                 'result': '出错' not in result and 'Cookie' not in result
             })
-    _,jifen = query_score()
+    if config.vaapikai:
+        jifen = '第三方验证'
+    else:    
+        _,jifen = query_score()
     for group_id, result_list in coin_result_group.items():
         result_num = len(result_list)
         if result_fail := len([result for result in result_list if not result['result']]):

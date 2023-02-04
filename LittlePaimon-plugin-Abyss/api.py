@@ -8,7 +8,7 @@ from LittlePaimon.database import PrivateCookie
 from typing import Union
 from LittlePaimon.utils.api import md5,get_cookie,random_text, random_hex, get_old_version_ds
 import httpx
-from .config import key,vaapi
+from .config import config
 
 
 http = httpx.Client(timeout=20, transport=httpx.HTTPTransport(retries=10))
@@ -27,7 +27,7 @@ bbs_get_captcha = bbs_api + "/misc/api/createVerification?is_high=true"
 bbs_captcha_verify = bbs_api + "/misc/api/verifyVerification"
 
 def query_score():
-    response = http.get("http://api.rrocr.com/api/integral.html?appkey="+key)
+    response = http.get("http://api.rrocr.com/api/integral.html?appkey="+config.appkey)
     data = response.json()
     if data['status'] == -1:
         logger.info('查询积分失败')
@@ -41,7 +41,7 @@ def query_score():
 
 def vaapigt(gt: str, challenge: str,referer: str):
     """validate,challenge"""
-    response = http.get(vaapi + 
+    response = http.get(config.vaapi + 
                          f'gt={gt}&challenge={challenge}',
                         timeout=60)
     data = response.json()
@@ -51,8 +51,9 @@ def vaapigt(gt: str, challenge: str,referer: str):
         challenge =data['data']['challenge']
         return validate,challenge
     else:
-        logger.info('[第三方]失败')
-        validate,challenge = rrocr(gt, challenge, referer)
+        logger.info('[第三方]失败')# 打码失败输出错误信息,返回'j'
+        validate="j"
+        challenge ="j"
         return validate,challenge  # 失败返回'j' 成功返回validate
 
 def rrocr(gt: str, challenge: str, referer: str):
@@ -63,7 +64,7 @@ def rrocr(gt: str, challenge: str, referer: str):
         challenge ="j"
         return validate,challenge
     response = http.post('http://api.rrocr.com/api/recognize.html', params={
-        'appkey': key,
+        'appkey': config.appkey,
         'gt': gt,
         'challenge': challenge,
         'referer': referer,
@@ -82,7 +83,7 @@ def rrocr(gt: str, challenge: str, referer: str):
         return validate,challenge  # 失败返回'j' 成功返回validate
 
 def get_validate(gt: str, challenge: str, referer: str):
-    if vaapi:
+    if config.vaapikai:
         validate,challenge = vaapigt(gt, challenge, referer)   
     else:
         validate,challenge = rrocr(gt, challenge, referer)
@@ -147,10 +148,7 @@ async def get_sign_info(user_id: str, uid: str,cookie:str) -> Union[dict, str]:
 
 
 def old_version_get_ds_token(mysbbs=False):
-    if mysbbs:
-        n = 'N50pqm7FSy2AkFz2B3TqtuZMJ5TOl3Ep'
-    else:
-        n = 'z8DRIUjNDT7IT5IZXvrUAxyupA1peND9'
+    n = 'N50pqm7FSy2AkFz2B3TqtuZMJ5TOl3Ep'
     i = str(int(time.time()))
     r = ''.join(random.sample(string.ascii_lowercase + string.digits, 6))
     c = md5('salt=' + n + '&t=' + i + '&r=' + r)

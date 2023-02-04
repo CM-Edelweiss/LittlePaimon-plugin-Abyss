@@ -5,7 +5,7 @@ import time
 from collections import defaultdict
 from nonebot import get_bot
 from LittlePaimon.database import MihoyoBBSSub,Player,PrivateCookie
-from .config import auto_sign_enable,auto_sign_hour,auto_sign_minute
+from .config import config
 from LittlePaimon.utils import logger, scheduler
 from LittlePaimon.plugins.Paimon_DailyNote.draw import draw_daily_note_card
 from LittlePaimon.utils.api import get_mihoyo_private_data,get_ds,get_cookie
@@ -104,7 +104,7 @@ async def sign_in(user_id,uid) -> str:
     logger.info('米游社签到', '➤', {'用户': user_id, 'UID': uid}, f'签到完成, 结果: {mes_im}, 漏签次数: {sign_missed}', True)
     return True, result
 
-@scheduler.scheduled_job('cron', hour=auto_sign_hour, minute=auto_sign_minute,
+@scheduler.scheduled_job('cron', hour=config.enable_hour, minute=config.enable_minute,
                          misfire_grace_time=10)
 async def _():
     await bbs_auto_sign()
@@ -113,7 +113,7 @@ async def bbs_auto_sign():
     """
     指定时间，执行所有米游社原神签到任务
     """
-    if not auto_sign_enable:
+    if not config.enable:
         return
     t = time.time()  # 计时用
     subs = await MihoyoBBSSub.filter(sub_event='米游社验证签到').all()
@@ -131,12 +131,15 @@ async def bbs_auto_sign():
                 'result': '失败' not in result and 'Cookies' not in result
             })
         await asyncio.sleep(random.randint(15, 25))
-    _,jifen = query_score()
+    if config.vaapikai:
+        jifen = '第三方验证'
+    else:    
+        _,jifen = query_score()
     for group_id, result_list in coin_result_group.items():
         result_num = len(result_list)
         if result_fail := len([result for result in result_list if not result['result']]):
             fails = '\n'.join(result['uid'] for result in result_list if not result['result'])
-            msg = f'本群米游社签到共{result_num}个任务，{jifen}其中成功{result_num - result_fail}个，失败{result_fail}个，失败的UID列表：\n{fails}'
+            msg = f'本群米游社签到共{result_num}个任务，{jifen}，其中成功{result_num - result_fail}个，失败{result_fail}个，失败的UID列表：\n{fails}'
         else:
             msg = f'本群米游社签到共{result_num}个任务，{jifen}，已全部完成'
         try:
