@@ -1,5 +1,5 @@
 <p align="center" >
-  <a href="https://github.com/CMHopeSunshine/LittlePaimon/tree/nonebot2"><img src="http://static.cherishmoon.fun/LittlePaimon/readme/logo.png" width="256" height="256" alt="LittlePaimon"></a>
+  <a href="https://github.com/CMHopeSunshine/LittlePaimon/"><img src="http://static.cherishmoon.fun/LittlePaimon/readme/logo.png" width="256" height="256" alt="LittlePaimon"></a>
 </p>
 <h1 align="center">小派蒙|LittlePaimon-plugin-Abyss</h1>
 <h4 align="center">✨为LittlePaimon插件提供实时便签和签到接入接码平台✨</h4>
@@ -22,8 +22,8 @@
 指令看小派蒙帮助图
 
 ## 丨⚙️ 配置
-第一次启动时生成文件LittlePaimon\config\Abyss_config.yml
-
+第一次启动时生成文件`LittlePaimon\config\Abyss_config.yml`
+或者看小派蒙webui的原神加强签到
 ## 丨💸鸣谢
 - [LittlePaimon](https://github.com/CMHopeSunshine/LittlePaimon)实时便签和米游币获取代码（~~直接开抄~~）
 - [GenshinUID](https://github.com/KimigaiiWuyi/GenshinUID/tree/nonebot2-beta1)签到代码（~~直接开抄~~）
