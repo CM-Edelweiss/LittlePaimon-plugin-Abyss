@@ -1,5 +1,5 @@
 from nonebot import on_command
-from nonebot.adapters.onebot.v11 import PrivateMessageEvent,GroupMessageEvent,Bot
+from nonebot.adapters.onebot.v11 import PrivateMessageEvent,GroupMessageEvent,Bot,MessageEvent
 from LittlePaimon.utils import logger
 from LittlePaimon.utils.message import CommandUID, CommandSwitch, CommandPlayer
 from typing import Union
@@ -67,7 +67,7 @@ all_coin = on_command('全部验证重做', priority=8, block=True, permission=S
 list = []
 
 @sign.handle()
-async def _(bot:Bot,event: GroupMessageEvent, uid=CommandUID(), switch=CommandSwitch()):
+async def _(bot:Bot,event: Union[GroupMessageEvent, PrivateMessageEvent], uid=CommandUID(), switch=CommandSwitch()):
     if (event.group_id in config.whitelist) or (event.user_id in config.whlist) or (str(event.user_id) in bot.config.superusers):
         if switch is None:
             if f'{event.user_id}-{uid}' in list:
@@ -79,7 +79,7 @@ async def _(bot:Bot,event: GroupMessageEvent, uid=CommandUID(), switch=CommandSw
                 _, result = await sign_in(str(event.user_id), uid)
                 list.remove(f'{event.user_id}-{uid}')
                 await sign.finish(result, at_sender=True)
-        else:
+        elif isinstance(event, GroupMessageEvent):
             sub_data = {
                 'user_id':    event.user_id,
                 'uid':        uid,
@@ -101,7 +101,9 @@ async def _(bot:Bot,event: GroupMessageEvent, uid=CommandUID(), switch=CommandSw
                     logger.info('米游社[验证]签到', '', {'user_id': event.user_id, 'uid': uid}, '关闭成功', True)
                     await sign.finish(f'UID{uid}关闭米游社[验证]自动签到成功', at_sender=True)
                 else:
-                    await sign.finish(f'UID{uid}尚未开启米游社[验证]自动签到，无需关闭！', at_sender=True)               
+                    await sign.finish(f'UID{uid}尚未开启米游社[验证]自动签到，无需关闭！', at_sender=True)
+        else:
+            await sign.finish('不支持订阅', at_sender=True)           
     else:
         await sign.finish(config.hfu, at_sender=True)
 
@@ -113,23 +115,23 @@ async def _(event: Union[GroupMessageEvent, PrivateMessageEvent]):
 
 
 @ti.handle()
-async def _(bot:Bot,event: GroupMessageEvent, state: T_State, players=CommandPlayer()):
+async def _(bot:Bot,event: MessageEvent, state: T_State, players=CommandPlayer()):
     if (event.group_id in config.whitelist) or (event.user_id in config.whlist) or (str(event.user_id) in bot.config.superusers):
         logger.info('原神体力', '开始执行查询')
         for player in players:
             if f'{event.user_id}-{player.uid}' in list:
-                await sign.finish('你已经有验证任务了，请勿重复发送', at_sender=True)
+                await ti.finish('你已经有验证任务了，请勿重复发送', at_sender=True)
             else:
                list.append(f'{event.user_id}-{player.uid}')
                result = await handle_ssbq(player)
                list.remove(f'{event.user_id}-{player.uid}')
         await ti.finish(result, at_sender=True)
     else:
-        await sign.finish(config.hfu, at_sender=True)
+        await ti.finish(config.hfu, at_sender=True)
 
 
 @get_coin.handle()
-async def _(bot:Bot,event: GroupMessageEvent, uid=CommandUID(), switch=CommandSwitch()):
+async def _(bot:Bot,event: Union[GroupMessageEvent, PrivateMessageEvent], uid=CommandUID(), switch=CommandSwitch()):
     if (event.group_id in config.whitelist) or (event.user_id in config.whlist) or (str(event.user_id) in bot.config.superusers):
         if switch is None:
             # 没有开关参数，手动执行米游币获取
@@ -142,7 +144,7 @@ async def _(bot:Bot,event: GroupMessageEvent, uid=CommandUID(), switch=CommandSw
                 result = await mhy_bbs_coin(str(event.user_id), uid)
                 list.remove(f'{event.user_id}-{uid}')
                 await get_coin.finish(result, at_sender=True)
-        else:
+        elif isinstance(event, GroupMessageEvent):
             sub_data = {
                 'user_id':   event.user_id,
                 'uid':       uid,
@@ -154,7 +156,7 @@ async def _(bot:Bot,event: GroupMessageEvent, uid=CommandUID(), switch=CommandSw
                     await MihoyoBBSSub.update_or_create(**sub_data, defaults={
                         'group_id': event.group_id if isinstance(event, GroupMessageEvent) else event.user_id})
                     logger.info('米游币自动获取', '', {'user_id': event.user_id, 'uid': uid}, '开启成功', True)
-                    await sign.finish(f'UID{uid}开启[验证]米游币自动获取成功', at_sender=True)
+                    await get_coin.finish(f'UID{uid}开启[验证]米游币自动获取成功', at_sender=True)
                 else:
                     await get_coin.finish(f'UID{uid}尚未绑定Cookie或Cookie中没有login_ticket！请先使用ysb指令绑定吧！', at_sender=True)
             else:
@@ -162,11 +164,13 @@ async def _(bot:Bot,event: GroupMessageEvent, uid=CommandUID(), switch=CommandSw
                 if sub := await MihoyoBBSSub.get_or_none(**sub_data):
                     await sub.delete()
                     logger.info('米游币自动获取', '', {'user_id': event.user_id, 'uid': uid}, '关闭成功', True)
-                    await sign.finish(f'UID{uid}关闭[验证]米游币自动获取成功', at_sender=True)
+                    await get_coin.finish(f'UID{uid}关闭[验证]米游币自动获取成功', at_sender=True)
                 else:
-                    await sign.finish(f'UID{uid}尚未开启[验证]米游币自动获取，无需关闭！', at_sender=True)
+                    await get_coin.finish(f'UID{uid}尚未开启[验证]米游币自动获取，无需关闭！', at_sender=True)
+        else:
+            await get_coin.finish('不支持订阅', at_sender=True)
     else:
-        await sign.finish(config.hfu, at_sender=True)
+        await get_coin.finish(config.hfu, at_sender=True)
 
 @all_coin.handle()
 async def _(event: Union[GroupMessageEvent, PrivateMessageEvent]):
