@@ -68,7 +68,7 @@ list = []
 
 @sign.handle()
 async def _(bot:Bot,event: GroupMessageEvent, uid=CommandUID(), switch=CommandSwitch()):
-    if (str(event.group_id) in config.whitelist) or (str(event.user_id) in config.whlist) or (str(event.user_id) in bot.config.superusers):
+    if (event.group_id in config.whitelist) or (event.user_id in config.whlist) or (str(event.user_id) in bot.config.superusers):
         if switch is None:
             if f'{event.user_id}-{uid}' in list:
                 await sign.finish('你已经有验证任务了，请勿重复发送', at_sender=True)
@@ -114,7 +114,7 @@ async def _(event: Union[GroupMessageEvent, PrivateMessageEvent]):
 
 @ti.handle()
 async def _(bot:Bot,event: GroupMessageEvent, state: T_State, players=CommandPlayer()):
-    if (str(event.group_id) in config.whitelist) or (str(event.user_id) in config.whlist) or (str(event.user_id) in bot.config.superusers):
+    if (event.group_id in config.whitelist) or (event.user_id in config.whlist) or (str(event.user_id) in bot.config.superusers):
         logger.info('原神体力', '开始执行查询')
         for player in players:
             if f'{event.user_id}-{player.uid}' in list:
@@ -130,7 +130,7 @@ async def _(bot:Bot,event: GroupMessageEvent, state: T_State, players=CommandPla
 
 @get_coin.handle()
 async def _(bot:Bot,event: GroupMessageEvent, uid=CommandUID(), switch=CommandSwitch()):
-    if (str(event.group_id) in config.whitelist) or (str(event.user_id) in config.whlist) or (str(event.user_id) in bot.config.superusers):
+    if (event.group_id in config.whitelist) or (event.user_id in config.whlist) or (str(event.user_id) in bot.config.superusers):
         if switch is None:
             # 没有开关参数，手动执行米游币获取
             if f'{event.user_id}-{uid}' in list:
