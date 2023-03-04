@@ -111,7 +111,7 @@ async def sign_in(user_id, uid) -> str:
     getnum = sign_list['data']['awards'][int(
         sign_info['total_sign_day'])]['cnt']
     get_im = f'本次签到获得{getitem}x{getnum}'
-    new_sign_info = await get_sign_info(user_id, uid, cookie.cookie)
+    new_sign_info = await get_sign_info(uid, cookie.cookie)
     new_sign_info = new_sign_info['data']
     if new_sign_info['is_sign']:
         mes_im = '签到成功'
