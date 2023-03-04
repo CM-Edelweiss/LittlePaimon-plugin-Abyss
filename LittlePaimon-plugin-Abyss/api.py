@@ -94,7 +94,7 @@ async def get_validate(gt, challenge, referer) -> str:
         validate, challenge2 = await rrocr(gt, challenge, referer)
     elif config.vaapikai == 'and':
         validate, challenge2 = await vaapigt(gt, challenge)
-        if validate == None:
+        if validate is None:
             logger.info('验证', '➤', '', '启用人人', True)
             validate, challenge2 = await rrocr(gt, challenge, referer)
     else:
@@ -127,13 +127,15 @@ async def get_pass_challenge(uid, user_id) -> str:
     validate, _ = await get_validate(data["data"]["gt"], data["data"]["challenge"],
                                      "https://webstatic.mihoyo.com/bbs/event/signin-ys/index.html?bbs_auth_required=true&act_id"
                                      "=e202009291139501&utm_source=bbs&utm_medium=mys&utm_campaign=icon")
-    if validate != None:
+    if validate is not None:
         check_req = await aiorequests.post(url=bbs_captcha_verify, headers=headers,
                                            json={"geetest_challenge": data["data"]["challenge"],
                                                  "geetest_seccode": validate+"|jordan",
                                                  "geetest_validate": validate})
         check = check_req.json()
         if check["retcode"] == 0:
+            logger.info('验证', '➤', {'用户': user_id,
+                                      'UID': uid}, '成功获取challenge', True)
             return check["data"]["challenge"]
     return None
 

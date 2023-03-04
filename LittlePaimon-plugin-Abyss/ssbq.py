@@ -41,8 +41,6 @@ async def handle_ssbq(player: Player):
         await asyncio.sleep(1)
         challenge = await get_pass_challenge(player.uid, player.user_id)
         if challenge is not None:
-            logger.info('原神体力', '➤', {'用户': player.user_id,
-                                      'UID': player.uid}, '成功获取challenge', True)
             server_id = 'cn_qd01' if player.uid[0] == '5' else 'cn_gf01'
             # cookie_info = await PrivateCookie.get_or_none(user_id=player.user_id, uid=player.uid)
             cookie_info = await get_cookie(player.user_id, player.uid, True, True)

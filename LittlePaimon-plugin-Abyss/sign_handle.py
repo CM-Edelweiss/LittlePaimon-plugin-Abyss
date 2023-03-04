@@ -68,7 +68,7 @@ async def sign_in(user_id, uid) -> str:
                 gt = sign_data['data']['gt']
                 challenge = sign_data['data']['challenge']
                 validate, challeng = await get_validate(gt, challenge, SIGN_URL)
-                if validate != None and challeng != None:
+                if (validate is not None) and (challeng is not None):
                     delay = 50 + random.randint(1, 50)
                     Header['x-rpc-challenge'] = challeng
                     Header['x-rpc-validate'] = validate
