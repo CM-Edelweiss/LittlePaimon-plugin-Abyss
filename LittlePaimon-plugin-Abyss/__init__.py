@@ -31,7 +31,7 @@ __plugin_meta__ = PluginMetadata(
 sign = on_command('验证签到', priority=8, block=True, state={
     'pm_name':        '验证签到',
     'pm_description': '*执行米游社签到操作，并对验证码进行验证',
-    'pm_usage':       '验证签到',
+    'pm_usage':       '验证签到(uid)[on|off]',
     'pm_priority':    1
 })
 
@@ -45,7 +45,7 @@ all_sign = on_command('全部验证重签', priority=8, block=True, permission=S
 
 ti = on_command('验证体力', priority=8, block=True, state={
     'pm_name':        '体力',
-    'pm_description': '*验证体力',
+    'pm_description': '*验证体力(uid)',
     'pm_usage':       '查看原神体力，并对验证码进行验证',
     'pm_priority':    3
 })
@@ -77,7 +77,7 @@ async def _(bot: Bot, event: Union[GroupMessageEvent, PrivateMessageEvent], uid=
     if (groupid in config.whitelist) or (event.user_id in config.whlist) or (str(event.user_id) in bot.config.superusers):
         if switch is None:
             if f'{event.user_id}-{uid}' in list:
-                await sign.finish(f'你已经有验证任务了，{NICKNAME}很忙不过来的', at_sender=True)
+                await sign.finish(f'你已经有验证任务了，{NICKNAME}会忙不过来的', at_sender=True)
             else:
                 await sign.send(f'{NICKNAME}开始为UID{uid}执行加强米游社签到，请稍等...', at_sender=True)
                 logger.info('加强米游社签到', '➤', {'用户': str(
@@ -133,7 +133,7 @@ async def _(bot: Bot, event: Union[GroupMessageEvent, PrivateMessageEvent], play
 
         for player in players:
             if f'{event.user_id}-{player.uid}' in list:
-                await ti.finish(f'你已经有验证任务了，{NICKNAME}很忙不过来的', at_sender=True)
+                await ti.finish(f'你已经有验证任务了，{NICKNAME}会忙不过来的', at_sender=True)
             else:
                 logger.info('原神体力', '➤', {'用户': str(
                     event.user_id), 'uid': player.uid}, '开始执行查询', True)
@@ -156,7 +156,7 @@ async def _(bot: Bot, event: Union[GroupMessageEvent, PrivateMessageEvent], uid=
         if switch is None:
             # 没有开关参数，手动执行米游币获取
             if f'{event.user_id}-{uid}' in list:
-                await get_coin.finish(f'你已经有验证任务了，{NICKNAME}很忙不过来的', at_sender=True)
+                await get_coin.finish(f'你已经有验证任务了，{NICKNAME}会忙不过来的', at_sender=True)
             else:
                 await get_coin.send(f'开始为UID{uid}执行加强米游币获取，请稍等...', at_sender=True)
                 logger.info('加强米游币获取', '➤', {'用户': str(
