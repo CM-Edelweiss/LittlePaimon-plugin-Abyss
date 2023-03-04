@@ -89,19 +89,19 @@ async def rrocr(gt, challenge, referer) -> str:
 
 async def get_validate(gt, challenge, referer) -> str:
     if config.vaapikai == 'rr':
-        validate, challenge = await vaapigt(gt, challenge)
+        validate, challenge2 = await vaapigt(gt, challenge)
     elif config.vaapikai == 'dsf':
-        validate, challenge = await rrocr(gt, challenge, referer)
+        validate, challenge2 = await rrocr(gt, challenge, referer)
     elif config.vaapikai == 'and':
-        validate, challenge = await vaapigt(gt, challenge)
+        validate, challenge2 = await vaapigt(gt, challenge)
         if validate == None:
             logger.info('验证', '➤', '', '启用人人', True)
-            validate, challenge = await rrocr(gt, challenge, referer)
+            validate, challenge2 = await rrocr(gt, challenge, referer)
     else:
         validate = None
-        challenge = None
+        challenge2 = None
         logger.info('验证', '➤', '', '错误的配置', False)
-    return validate, challenge  # 失败返回None 成功返回validate
+    return validate, challenge2  # 失败返回None 成功返回validate
 
 
 async def get_pass_challenge(uid, user_id) -> str:
