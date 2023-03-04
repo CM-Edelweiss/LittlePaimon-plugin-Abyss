@@ -3,22 +3,20 @@ import json
 import time
 import random
 import string
+from typing import Union
+
+from LittlePaimon.utils.api import md5, get_cookie, random_text, random_hex, get_old_version_ds
+from LittlePaimon.utils.requests import aiorequests
 from LittlePaimon.utils import logger
 from LittlePaimon.database import PrivateCookie
-from typing import Union
-from LittlePaimon.utils.api import md5,get_cookie,random_text, random_hex, get_old_version_ds
-import httpx
+
 from .config import config
 
-
-http = httpx.Client(timeout=20, transport=httpx.HTTPTransport(retries=10))
-
-#米游社的API
-#签到列表
+# 签到列表
 SIGN_LIST_URL = 'https://api-takumi.mihoyo.com/event/bbs_sign_reward/home'
-#签到信息
+# 签到信息
 SIGN_INFO_URL = 'https://api-takumi.mihoyo.com/event/bbs_sign_reward/info'
-#执行签到
+# 执行签到
 SIGN_URL = 'https://api-takumi.mihoyo.com/event/bbs_sign_reward/sign'
 
 # 通用设置
@@ -26,70 +24,87 @@ bbs_api = "https://bbs-api.mihoyo.com"
 bbs_get_captcha = bbs_api + "/misc/api/createVerification?is_high=true"
 bbs_captcha_verify = bbs_api + "/misc/api/verifyVerification"
 
-def query_score():
-    response = http.get("http://api.rrocr.com/api/integral.html?appkey="+config.appkey)
+
+async def query_score():
+    url = f'http://api.rrocr.com/api/integral.html?appkey={config.appkey}'
+    response = await aiorequests.get(url)
     data = response.json()
     if data['status'] == -1:
-        logger.info('查询积分失败')
-        return True,'查询积分失败'
+        logger.info('查询积分', '➤', '', '失败', False)
+        return True, '查询积分失败'
     integral = data['integral']
     if int(integral) < 10:
-        logger.info('积分不足')
-        return True,f'积分还剩{integral}'
-    logger.info('积分还剩' + integral)
-    return False,f'积分还剩{integral}'
+        logger.info('人人积分', '➤', '', '积分不足', False)
+        return True, f'积分还剩{integral}'
+    logger.info('人人积分', '➤', '', integral, True)
+    return False, f'积分还剩{integral}'
 
-def vaapigt(gt: str, challenge: str,referer: str):
+
+async def vaapigt(gt, challenge) -> str:
     """validate,challenge"""
-    response = http.get(config.vaapi + 
-                         f'gt={gt}&challenge={challenge}',
-                        timeout=60)
+    url = f'{config.vaapi}gt={gt}&challenge={challenge}'
+    response = await aiorequests.get(url,
+                                     timeout=60)
     data = response.json()
     if 'data' in data and 'validate' in data['data']:
-        logger.info('[第三方]成功')
-        validate =data['data']['validate']
-        challenge =data['data']['challenge']
-        return validate,challenge
+        logger.info('第三方验证', '➤', '', '成功', True)
+        validate = data['data']['validate']
+        challenge = data['data']['challenge']
+        return validate, challenge
     else:
-        logger.info('[第三方]失败')# 打码失败输出错误信息,返回'j'
-        validate="j"
-        challenge ="j"
-        return validate,challenge  # 失败返回'j' 成功返回validate
+        # 打码失败输出错误信息,返回None
+        logger.info('第三方验证', '➤', '', '失败', False)
+        validate = None
+        challenge = None
+        return validate, challenge  # 失败返回None 成功返回validate
 
-def rrocr(gt: str, challenge: str, referer: str):
+
+async def rrocr(gt, challenge, referer) -> str:
     """validate,challenge"""
-    jifen,_ = query_score()
+    jifen, _ = await query_score()
     if jifen:
-        validate="j"
-        challenge ="j"
-        return validate,challenge
-    response = http.post('http://api.rrocr.com/api/recognize.html', params={
+        validate = None
+        challenge = None
+        return validate, challenge
+    response = await aiorequests.post('http://api.rrocr.com/api/recognize.html', params={
         'appkey': config.appkey,
         'gt': gt,
         'challenge': challenge,
         'referer': referer,
-        'sharecode': 'a83baa99828342ccac180b19217e2a93'#？不明
+        'sharecode': 'a83baa99828342ccac180b19217e2a93'  # ？不明
     }, timeout=60)
     data = response.json()
     if 'data' in data and 'validate' in data['data']:
-        logger.info(data['msg'])  
-        validate =data['data']['validate']
-        challenge =data['data']['challenge']
-        return validate,challenge
+        logger.info('人人验证', '➤', '', data['msg'], True)
+        validate = data['data']['validate']
+        challenge = data['data']['challenge']
+        return validate, challenge
     else:
-        logger.info(data['msg'])# 打码失败输出错误信息,返回'j'
-        validate="j"
-        challenge ="j"
-        return validate,challenge  # 失败返回'j' 成功返回validate
+        # 打码失败输出错误信息,返回None
+        logger.info('人人验证', '➤', '', data['msg'], False)
+        validate = None
+        challenge = None
+        return validate, challenge  # 失败返回None 成功返回validate
 
-def get_validate(gt: str, challenge: str, referer: str):
-    if config.vaapikai:
-        validate,challenge = vaapigt(gt, challenge, referer)   
+
+async def get_validate(gt, challenge, referer) -> str:
+    if config.vaapikai == 'rr':
+        validate, challenge = await vaapigt(gt, challenge)
+    elif config.vaapikai == 'dsf':
+        validate, challenge = await rrocr(gt, challenge, referer)
+    elif config.vaapikai == 'and':
+        validate, challenge = await vaapigt(gt, challenge)
+        if validate == None:
+            logger.info('验证', '➤', '', '启用人人', True)
+            validate, challenge = await rrocr(gt, challenge, referer)
     else:
-        validate,challenge = rrocr(gt, challenge, referer)
-    return validate,challenge  # 失败返回'j' 成功返回validate
-    
-async def get_pass_challenge(uid: str,user_id: str):
+        validate = None
+        challenge = None
+        logger.info('验证', '➤', '', '错误的配置', False)
+    return validate, challenge  # 失败返回None 成功返回validate
+
+
+async def get_pass_challenge(uid, user_id) -> str:
     cookie_info = await get_cookie(user_id, uid, True, True)
     headers = {
         "DS": get_old_version_ds(),
@@ -105,18 +120,18 @@ async def get_pass_challenge(uid: str,user_id: str):
         "Host": "bbs-api.mihoyo.com",
         "User-Agent": "okhttp/4.8.0"
     }
-    req = http.get(url=bbs_get_captcha, headers=headers)
+    req = await aiorequests.get(url=bbs_get_captcha, headers=headers)
     data = req.json()
     if data["retcode"] != 0:
         return None
-    validate,_ = get_validate(data["data"]["gt"], data["data"]["challenge"],
-                    "https://webstatic.mihoyo.com/bbs/event/signin-ys/index.html?bbs_auth_required=true&act_id"
-                    "=e202009291139501&utm_source=bbs&utm_medium=mys&utm_campaign=icon")
-    if validate != 'j':
-        check_req = http.post(url=bbs_captcha_verify, headers=headers,
-                                json={"geetest_challenge": data["data"]["challenge"],
-                                    "geetest_seccode": validate+"|jordan",
-                                    "geetest_validate": validate})
+    validate, _ = await get_validate(data["data"]["gt"], data["data"]["challenge"],
+                                     "https://webstatic.mihoyo.com/bbs/event/signin-ys/index.html?bbs_auth_required=true&act_id"
+                                     "=e202009291139501&utm_source=bbs&utm_medium=mys&utm_campaign=icon")
+    if validate != None:
+        check_req = await aiorequests.post(url=bbs_captcha_verify, headers=headers,
+                                           json={"geetest_challenge": data["data"]["challenge"],
+                                                 "geetest_seccode": validate+"|jordan",
+                                                 "geetest_validate": validate})
         check = check_req.json()
         if check["retcode"] == 0:
             return check["data"]["challenge"]
@@ -135,16 +150,14 @@ _HEADER = {
 }
 
 
-
-async def get_sign_info(user_id: str, uid: str,cookie:str) -> Union[dict, str]:
+async def get_sign_info(uid, cookie) -> str:
     server_id = 'cn_qd01' if uid[0] == '5' else 'cn_gf01'
     HEADER = copy.deepcopy(_HEADER)
     HEADER['Cookie'] = cookie
-    req = http.get(url=SIGN_INFO_URL, headers=HEADER,
-                    params={"act_id": 'e202009291139501', 'region': server_id,'uid': uid})
+    req = await aiorequests.get(url=SIGN_INFO_URL, headers=HEADER,
+                                params={"act_id": 'e202009291139501', 'region': server_id, 'uid': uid})
     data = req.json()
     return data
-
 
 
 def old_version_get_ds_token(mysbbs=False):
@@ -154,8 +167,9 @@ def old_version_get_ds_token(mysbbs=False):
     c = md5('salt=' + n + '&t=' + i + '&r=' + r)
     return i + ',' + r + ',' + c
 
-async def mihoyo_bbs_sign(user_id: str, uid: str,Header={}) -> Union[dict, str]:
-    #cookie_info = await PrivateCookie.get_or_none(user_id=user_id, uid=uid)
+
+async def mihoyo_bbs_sign(user_id: str, uid: str, Header={}) -> Union[dict, str]:
+    # cookie_info = await PrivateCookie.get_or_none(user_id=user_id, uid=uid)
     cookie_info = await get_cookie(user_id, uid, True, True)
     server_id = 'cn_qd01' if uid[0] == '5' else 'cn_gf01'
     HEADER = copy.deepcopy(_HEADER)
@@ -164,7 +178,7 @@ async def mihoyo_bbs_sign(user_id: str, uid: str,Header={}) -> Union[dict, str]:
         'AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 '
         'Chrome/83.0.4103.101 Mobile Safari/537.36 miHoYoBBS/2.35.2'
     )
-    HEADER['Cookie'] =  cookie_info.cookie
+    HEADER['Cookie'] = cookie_info.cookie
     HEADER['x-rpc-device_id'] = random_hex(32)
     HEADER['x-rpc-app_version'] = '2.35.2'
     HEADER['x-rpc-client_type'] = '5'
@@ -176,13 +190,14 @@ async def mihoyo_bbs_sign(user_id: str, uid: str,Header={}) -> Union[dict, str]:
         '&utm_medium=mys&utm_campaign=icon'
     )
     HEADER.update(Header)
-    req = http.post(url=SIGN_URL, headers=HEADER,
-                    json={'act_id': 'e202009291139501', 'uid': uid,'region': server_id})
+    req = await aiorequests.post(url=SIGN_URL, headers=HEADER,
+                                 json={'act_id': 'e202009291139501', 'uid': uid, 'region': server_id})
     data = req.json()
     return data
 
 
 async def get_sign_list() -> dict:
-    req = http.get(url=SIGN_LIST_URL,headers=_HEADER,params={'act_id': 'e202009291139501'})
+    req = await aiorequests.get(url=SIGN_LIST_URL, headers=_HEADER,
+                                params={'act_id': 'e202009291139501'})
     data = req.json()
     return data
