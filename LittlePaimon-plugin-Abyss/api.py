@@ -95,8 +95,8 @@ async def get_validate(gt, challenge, referer) -> str:
     elif config.vaapikai == 'and':
         validate, challenge2 = await vaapigt(gt, challenge)
         if validate is None:
-            logger.info('验证', '➤', '', '启用人人', True)
-            validate, challenge2 = await rrocr(gt, challenge, referer)
+            logger.info('验证', '➤', '', '混合已鸽', True)
+            #validate, challenge2 = await rrocr(gt, challenge, referer)
     else:
         validate = None
         challenge2 = None
