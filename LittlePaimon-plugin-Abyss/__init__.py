@@ -162,7 +162,7 @@ async def _(bot: Bot, event: Union[GroupMessageEvent, PrivateMessageEvent], uid=
             if f'{event.user_id}-{uid}' in list:
                 await get_coin.finish(f'你已经有验证任务了，{NICKNAME}会忙不过来的', at_sender=True)
             else:
-                await get_coin.send(f'开始为UID{uid}执行加强米游币获取，请稍等...', at_sender=True)
+                await get_coin.send(f'{NICKNAME}开始为UID{uid}执行加强米游币获取，请稍等...', at_sender=True)
                 logger.info('加强米游币获取', '➤', {'用户': str(
                     event.user_id), 'uid': uid}, '执行获取', True)
                 list.append(f'{event.user_id}-{uid}')

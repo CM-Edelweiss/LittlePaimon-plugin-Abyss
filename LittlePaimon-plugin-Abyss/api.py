@@ -95,7 +95,7 @@ async def rrocr(gt, challenge, referer) -> str:
             'sharecode': 'a83baa99828342ccac180b19217e2a93'  # ？不明
         }, timeout=60)
     except httpx.RequestError as exc:
-        logger.info('第三方验证', '➤', '错误', exc, False)
+        logger.info('人人验证', '➤', '错误', exc, False)
         return None, None
     data = response.json()
     if 'data' in data and 'validate' in data['data']:

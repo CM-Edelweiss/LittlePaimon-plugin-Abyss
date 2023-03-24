@@ -142,6 +142,8 @@ async def bbs_auto_sign():
     if not subs:
         # 如果没有米游社原神签到订阅，则不执行签到任务
         return
+    logger.info(
+        '米游社加强签到', f'开始执行米游社加强签到，共<m>{len(subs)}</m>个任务，预计花费<m>{round(100 * len(subs) / 60, 2)}</m>分钟')
     coin_result_group = defaultdict(list)
     for sub in subs:
         im, result = await sign_in(str(sub.user_id), sub.uid)
