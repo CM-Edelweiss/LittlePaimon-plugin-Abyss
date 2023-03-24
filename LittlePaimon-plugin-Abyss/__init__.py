@@ -10,7 +10,7 @@ from LittlePaimon.database import PrivateCookie, MihoyoBBSSub
 from LittlePaimon.utils import logger, NICKNAME
 from LittlePaimon.utils.message import CommandUID, CommandSwitch, CommandPlayer
 
-from .ssbq import handle_ssbq
+from .ssbq import handle_ssbq, handle_ssbq2
 from .coin_handle import mhy_bbs_coin, bbs_auto_coin
 from .config import config
 from .sign_handle import sign_in, bbs_auto_sign
@@ -139,7 +139,11 @@ async def _(bot: Bot, event: Union[GroupMessageEvent, PrivateMessageEvent], play
                     event.user_id), 'uid': player.uid}, '开始执行查询', True)
                 result = Message()
                 list.append(f'{event.user_id}-{player.uid}')
-                result += await handle_ssbq(player)
+                msg = await handle_ssbq(player)
+                if msg == '疑似验证码':
+                    await ti.send(f'UID{player.uid}遇验证码阻拦,开始尝试过码', at_sender=True)
+                    msg = await handle_ssbq2(player)
+                result += msg
                 list.remove(f'{event.user_id}-{player.uid}')
         await ti.finish(result, at_sender=True)
     else:

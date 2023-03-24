@@ -124,7 +124,7 @@ class MihoyoBBSCoin:
         msg3 = '点赞帖子：已经完成过了~'
         msg4 = '分享帖子：已经完成过了~'
         while self.available_coins != 0 and w < 3:
-            logger.info('加强米游币自动获取', '➤', '', '开始第{w+1}次获取信息', True)
+            logger.info('加强米游币自动获取', '➤', '', f'开始第{w+1}次获取信息', True)
             if w > 0:
                 await self.get_tasks_list()
             msg1 = await self.signing()
@@ -214,7 +214,7 @@ class MihoyoBBSCoin:
         讨论区签到
         """
         if self.Task_do['bbs_Sign']:
-            return '讨论区签到：完成'
+            return '讨论区签到：完成!'
         header = {}
         header.update(self.headers)
         challenge = None
@@ -306,7 +306,7 @@ class MihoyoBBSCoin:
         分享帖子
         """
         if self.Task_do['bbs_Share']:
-            return '分享帖子：完成'
+            return '分享帖子：完成!'
         for _ in range(3):
             req = await aiorequests.get(
                 url=bbs_Shareurl.format(self.postsList[0][0]),

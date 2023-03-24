@@ -69,7 +69,7 @@ async def sign_in(user_id, uid) -> str:
                 challenge = sign_data['data']['challenge']
                 validate, challeng = await get_validate(gt, challenge, SIGN_URL)
                 if (validate is not None) and (challeng is not None):
-                    delay = 50 + random.randint(1, 50)
+                    delay = 10 + random.randint(1, 10)
                     Header['x-rpc-challenge'] = challeng
                     Header['x-rpc-validate'] = validate
                     Header['x-rpc-seccode'] = f'{validate}|jordan'
@@ -78,18 +78,18 @@ async def sign_in(user_id, uid) -> str:
                     await asyncio.sleep(delay)
                 else:
                     delay = 600 + random.randint(1, 60)
-                    logger.info('米游社签到', '➤', {
+                    logger.info('米游社加强签到', '➤', {
                                 '用户': user_id, 'UID': uid}, f'未获取验证码,等待{delay}秒后重试...', False)
                     await asyncio.sleep(delay)
                 continue
             # 成功签到!
             else:
                 if index == 0:
-                    logger.info('米游社签到', '➤', {
+                    logger.info('米游社加强签到', '➤', {
                                 '用户': user_id, 'UID': uid}, f'该用户无校验码!', True)
                     result = '[无验证]'
                 else:
-                    logger.info('米游社[验证]签到', '➤', {
+                    logger.info('米游社加强签到', '➤', {
                                 '用户': user_id, 'UID': uid}, f'该用户重试 {index} 次验证成功!', True)
                     result = '[有验证]'
                 break
