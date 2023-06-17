@@ -115,15 +115,15 @@ async def rrocr(gt, challenge, referer) -> str:
         return validate, challenge  # 失败返回None 成功返回validate
 
 
-async def panel(gt, ch, uid) -> str:  # 未完工
+async def panel(gt, ch, uid) -> str:
     """过码(人工)"""
     url = f"http://127.0.0.1:5000/geetest?gt={gt}&challenge={ch}&uid={uid}"
     try:
-        res = await aiorequests.get(url=url, timeout=29)
+        res = await aiorequests.get(url=url, timeout=31)
         res = res.json()
     except httpx.RequestError as exc:
         logger.info("人工验证", "➤", "", exc, False)
-        res = []
+        res = {}
     if "data" in res and "validate" in res["data"]:
         ch = res["data"]["challenge"]
         va = res["data"]["validate"]

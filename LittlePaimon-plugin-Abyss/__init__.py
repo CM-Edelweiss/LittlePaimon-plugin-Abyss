@@ -23,18 +23,18 @@ from .config import config
 from .sign_handle import sign_in, bbs_auto_sign
 from . import web_page, web_api
 
-#以后再说
-#@DRIVER.on_startup
-#async def start():
-#    logger.info("人工验证", "➤", "", "请使用pip install flask gevent安装依赖，安装过请忽略", True)
-#    logger.info(
-#        "人工验证",
-#        "➤",
-#        "",
-#        "请使用python LittlePaimon\plugins\LittlePaimon-plugin-Abyss\XX\run.py打开人工验证后端",
-#        True,
-#    )
-#    logger.info("人工验证", "➤", "", f"ip:{config.ip}端口:5000", True)
+
+@DRIVER.on_startup
+async def start():
+    logger.info("人工验证", "➤", "", "请使用pip install flask gevent安装依赖，安装过请忽略", True)
+    logger.info(
+        "人工验证",
+        "➤",
+        "",
+        "在根目录请使用python LittlePaimon\plugins\LittlePaimon-plugin-Abyss\geetest\run.py打开人工验证后端",
+        True,
+    )
+    logger.info("人工验证", "➤", "", f"ip:{config.ip}端口:5000", True)
 
 
 __plugin_meta__ = PluginMetadata(
@@ -143,7 +143,6 @@ sr_all_sign = on_command(
 get_pass = on_command(
     "米游社过码",
     priority=8,
-    permission=SUPERUSER,
     rule=to_me(),
     state={
         "pm_name": "米游社过码",

@@ -34,9 +34,9 @@ async def sr_mihoyo_bbs_sign(uid: str, ck: str, Header={}) -> Union[dict, str]:
     HEADER["x-rpc-app_version"] = "2.44.1"
     HEADER["x-rpc-client_type"] = "5"
     HEADER["X_Requested_With"] = "com.mihoyo.hyperion"
-    HEADER["DS"] = old_version_get_ds_token(True)
+    HEADER["DS"] = old_version_get_ds_token()
     HEADER["Referer"] = "https://webstatic.mihoyo.com"
-    HEADER.update(header)
+    HEADER.update(Header)
     data = await aiorequests.post(
         url=STAR_RAIL_SIGN_URL,
         headers=HEADER,

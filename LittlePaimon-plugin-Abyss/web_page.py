@@ -42,7 +42,7 @@ global_config_form = Form(
             options=[
                 {"label": "人人", "value": "rr"},
                 {"label": "第三方", "value": "dsf"},
-                {"label": "人工(未完工)", "value": "rg"},
+                {"label": "人工", "value": "rg"},
             ],
         ),
         InputText(
