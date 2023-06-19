@@ -171,6 +171,7 @@ async def _(
         (groupid in config.whitelist)
         or (event.user_id in config.whlist)
         or (str(event.user_id) in bot.config.superusers)
+        or (config.vaapikai == "rg")
     ):
         if config.vaapikai == "rg":
             await get_pass.send(
@@ -195,6 +196,7 @@ async def _(
         (groupid in config.whitelist)
         or (event.user_id in config.whlist)
         or (str(event.user_id) in bot.config.superusers)
+        or (config.vaapikai == "rg")
     ):
         from LittlePaimon.plugins.star_rail_info.data_handle import get_uid
 
@@ -222,7 +224,11 @@ async def _(
                 _, result = await sr_sign_in(str(event.user_id), uid2, uid, False)
                 sr_list.remove(f"{event.user_id}-{uid2}")
                 await sr_sign.finish(result, at_sender=True)
-        elif isinstance(event, GroupMessageEvent):
+        elif isinstance(event, GroupMessageEvent) and (
+            (groupid in config.whitelist)
+            or (event.user_id in config.whlist)
+            or (str(event.user_id) in bot.config.superusers)
+        ):
             sub_data = {
                 "user_id": event.user_id,
                 "uid": uid,
@@ -292,6 +298,7 @@ async def _(
         (groupid in config.whitelist)
         or (event.user_id in config.whlist)
         or (str(event.user_id) in bot.config.superusers)
+        or (config.vaapikai == "rg")
     ):
         if switch is None:
             if f"{event.user_id}-{uid}" in list:
@@ -308,7 +315,11 @@ async def _(
                 _, result = await sign_in(str(event.user_id), uid, False)
                 list.remove(f"{event.user_id}-{uid}")
                 await sign.finish(result, at_sender=True)
-        elif isinstance(event, GroupMessageEvent):
+        elif isinstance(event, GroupMessageEvent) and (
+            (groupid in config.whitelist)
+            or (event.user_id in config.whlist)
+            or (str(event.user_id) in bot.config.superusers)
+        ):
             sub_data = {"user_id": event.user_id, "uid": uid, "sub_event": "米游社验证签到"}
             if switch:
                 # switch为开启，则添加订阅
@@ -373,6 +384,7 @@ async def _(
         (groupid in config.whitelist)
         or (event.user_id in config.whlist)
         or (str(event.user_id) in bot.config.superusers)
+        or (config.vaapikai == "rg")
     ):
         for player in players:
             if f"{event.user_id}-{player.uid}" in list:
@@ -419,6 +431,7 @@ async def _(
         (groupid in config.whitelist)
         or (event.user_id in config.whlist)
         or (str(event.user_id) in bot.config.superusers)
+        or (config.vaapikai == "rg")
     ):
         if switch is None:
             # 没有开关参数，手动执行米游币获取
@@ -436,7 +449,11 @@ async def _(
                 result = await mhy_bbs_coin(str(event.user_id), uid, False)
                 list.remove(f"{event.user_id}-{uid}")
                 await get_coin.finish(result, at_sender=True)
-        elif isinstance(event, GroupMessageEvent):
+        elif isinstance(event, GroupMessageEvent) and (
+            (groupid in config.whitelist)
+            or (event.user_id in config.whlist)
+            or (str(event.user_id) in bot.config.superusers)
+        ):
             sub_data = {"user_id": event.user_id, "uid": uid, "sub_event": "米游币验证获取"}
             if switch:
                 # switch为开启，则添加订阅
