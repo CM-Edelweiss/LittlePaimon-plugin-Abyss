@@ -271,10 +271,7 @@ async def _(
                     await sr_sign.finish(f"UID{uid2}关闭加强星铁自动签到成功", at_sender=True)
                 else:
                     await sr_sign.finish(f"UID{uid2}尚未开启加强星铁自动签到，无需关闭！", at_sender=True)
-        else:
-            await sr_sign.finish("不支持订阅", at_sender=True)
-    else:
-        await sr_sign.finish(config.hfu, at_sender=True)
+    await sr_sign.finish(config.hfu, at_sender=True)
 
 
 @sr_all_sign.handle()
@@ -358,10 +355,7 @@ async def _(
                     await sign.finish(f"UID{uid}关闭加强米游社自动签到成功", at_sender=True)
                 else:
                     await sign.finish(f"UID{uid}尚未开启加强米游社自动签到，无需关闭！", at_sender=True)
-        else:
-            await sign.finish("不支持订阅", at_sender=True)
-    else:
-        await sign.finish(config.hfu, at_sender=True)
+    await sign.finish(config.hfu, at_sender=True)
 
 
 @all_sign.handle()
@@ -499,10 +493,7 @@ async def _(
                     await get_coin.finish(
                         f"UID{uid}尚未开启加强米游币自动获取，无需关闭！", at_sender=True
                     )
-        else:
-            await get_coin.finish("不支持订阅", at_sender=True)
-    else:
-        await get_coin.finish(config.hfu, at_sender=True)
+    await get_coin.finish(config.hfu, at_sender=True)
 
 
 @all_coin.handle()
