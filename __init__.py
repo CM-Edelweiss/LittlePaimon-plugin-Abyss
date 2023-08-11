@@ -1,4 +1,4 @@
-from LittlePaimon_plugin_Abyss.main import *
+from .LittlePaimon_plugin_Abyss.main import *
 from LittlePaimon.utils import logger
 
 logger.info("人工验证", "➤", "", "请使用pip install flask gevent安装依赖，安装过请忽略", True)
