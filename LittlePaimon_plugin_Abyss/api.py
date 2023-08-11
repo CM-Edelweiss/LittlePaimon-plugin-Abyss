@@ -140,9 +140,12 @@ async def tilioc(header: Dict, uid: str, re: bool):
         headers=header,
     )
     raw_data = raw_data.json()
-    gt = raw_data["data"]["gt"]
-    ch = raw_data["data"]["challenge"]
-
+    if raw_data and "data" in raw_data and "gt" in raw_data["data"] and "challenge" in raw_data["data"]:
+        gt = raw_data["data"]["gt"]
+        ch = raw_data["data"]["challenge"]
+    else:
+        logger.info("验证码获取", "➤", "", raw_data, False)
+        return False, None
     vl, ch = await get_validate(gt, ch, VERIFICATION_URL, uid, re)
 
     if vl:
@@ -172,7 +175,8 @@ async def tilioc(header: Dict, uid: str, re: bool):
 
 async def get_validate(gt, challenge, referer, uid, re) -> str:
     """体力和签到验证函数"""
-    mo = config.vaapikai2 if (re and config.vaapikai == "rg") else config.vaapikai
+    mo = config.vaapikai2 if (re and config.vaapikai ==
+                              "rg") else config.vaapikai
     if mo == "dsf":
         validate, challenge = await vaapigt(gt, challenge)
     elif mo == "rr":
@@ -237,6 +241,7 @@ async def mihoyo_bbs_sign(user_id: str, uid: str, Header={}) -> Union[dict, str]
 
 async def get_sign_list() -> dict:
     req = await aiorequests.get(
-        url=SIGN_LIST_URL, headers=_HEADER, params={"act_id": "e202009291139501"}
+        url=SIGN_LIST_URL, headers=_HEADER, params={
+            "act_id": "e202009291139501"}
     )
     return req.json()

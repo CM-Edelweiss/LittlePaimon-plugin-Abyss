@@ -38,13 +38,15 @@ async def handle_ssbq(player: Player):
         return f'{player.uid}获取数据失败，msg为{data["message"]}\n'
     else:
         logger.info(
-            "原神体力", "➤", {"用户": player.user_id, "UID": player.uid}, "获取数据成功", True
+            "原神体力", "➤", {"用户": player.user_id,
+                          "UID": player.uid}, "获取数据成功", True
         )
 
         try:
             img = await draw_daily_note_card(data["data"], player.uid)
             logger.info(
-                "原神体力", "➤➤", {"用户": player.user_id, "UID": player.uid}, "绘制图片成功", True
+                "原神体力", "➤➤", {"用户": player.user_id,
+                               "UID": player.uid}, "绘制图片成功", True
             )
 
             return img
@@ -84,7 +86,8 @@ async def handle_ssbq2(player: Player):
         return f"{player.uid}{data}\n"
     elif data["retcode"] == 1034:
         logger.info(
-            "原神体力", "➤", {"用户": player.user_id, "UID": player.uid}, "发生错误，请联系作者", False
+            "原神体力", "➤", {"用户": player.user_id,
+                          "UID": player.uid}, "发生错误，请联系作者", False
         )
         return "发生错误"
     elif data["retcode"] != 0:
@@ -99,13 +102,15 @@ async def handle_ssbq2(player: Player):
         return f'{player.uid}获取数据失败，msg为{data["message"]}\n'
     else:
         logger.info(
-            "原神体力", "➤", {"用户": player.user_id, "UID": player.uid}, "获取数据成功", True
+            "原神体力", "➤", {"用户": player.user_id,
+                          "UID": player.uid}, "获取数据成功", True
         )
 
         try:
             img = await draw_daily_note_card(data["data"], player.uid)
             logger.info(
-                "原神体力", "➤➤", {"用户": player.user_id, "UID": player.uid}, "绘制图片成功", True
+                "原神体力", "➤➤", {"用户": player.user_id,
+                               "UID": player.uid}, "绘制图片成功", True
             )
 
             return img

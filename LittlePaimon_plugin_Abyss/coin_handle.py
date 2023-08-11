@@ -70,7 +70,8 @@ mihoyo_bbs_List = [
         "name": "崩坏：星穹铁道",
         "url": "https://bbs.mihoyo.com/sr/",
     },
-    {"id": "8", "forumId": "57", "name": "绝区零", "url": "https://bbs.mihoyo.com/zzz/"},
+    {"id": "8", "forumId": "57", "name": "绝区零",
+        "url": "https://bbs.mihoyo.com/zzz/"},
 ]
 
 
@@ -93,6 +94,15 @@ class MihoyoBBSCoin:
             "Referer": "https://app.mihoyo.com",
             "Host": "bbs-api.mihoyo.com",
             "User-Agent": "okhttp/4.8.0",
+        }
+        self.header_2 = {
+            'Origin': 'https://webstatic.mihoyo.com',
+            'Cookie': cookies,
+            'x-rpc-app_version': "2.11.1",
+            'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS '
+            'X) AppleWebKit/605.1.15 (KHTML, like Gecko) miHoYoBBS/2.11.1',
+            'x-rpc-client_type': '5',
+            'Referer': 'https://webstatic.mihoyo.com/',
         }
         self.postsList: list = []
         self.Task_do: dict = {
@@ -194,7 +204,8 @@ class MihoyoBBSCoin:
                             self.Task_do["bbs_Share"] = True
                             # 分享帖子，是最后一个任务，到这里了下面都是一次性任务，直接跳出循环
                             break
-            logger.info("加强米游币自动获取", f"➤➤该用户今天还可获取<m>{self.available_coins}</m>个米游币")
+            logger.info(
+                "加强米游币自动获取", f"➤➤该用户今天还可获取<m>{self.available_coins}</m>个米游币")
 
     async def get_list(self):
         """
@@ -233,7 +244,7 @@ class MihoyoBBSCoin:
             if data["retcode"] != 0:
                 if data["retcode"] == 1034:
                     logger.info("社区签到触发验证码")
-                    re, challenge = await tilioc(header, self.uid, self.re)
+                    re, challenge = await tilioc(self.header_2, self.uid, self.re)
                     if re:
                         header["x-rpc-challenge"] = challenge
                 if data["retcode"] != 1034:
@@ -300,7 +311,7 @@ class MihoyoBBSCoin:
                     header.pop("x-rpc-challenge")
             elif data["retcode"] == 1034:
                 logger.info("点赞触发验证码")
-                re, challenge = await tilioc(header, self.uid, self.re)
+                re, challenge = await tilioc(self.header_2, self.uid, self.re)
                 if re:
                     header["x-rpc-challenge"] = challenge
             # 取消点赞
@@ -354,9 +365,11 @@ async def mhy_bbs_coin(user_id: str, uid: str, re: bool) -> str:
     elif cookie.stoken is None:
         return "你绑定Cookie中没有login_ticket，请重新用ysb指令绑定！"
     await LastQuery.update_or_create(
-        user_id=user_id, defaults={"uid": uid, "last_time": datetime.datetime.now()}
+        user_id=user_id, defaults={"uid": uid,
+                                   "last_time": datetime.datetime.now()}
     )
-    logger.info("加强米游币自动获取", "➤执行", {"用户": user_id, "UID": uid, "的米游币获取": "......"})
+    logger.info("加强米游币自动获取", "➤执行", {
+                "用户": user_id, "UID": uid, "的米游币获取": "......"})
 
     get_coin_task = MihoyoBBSCoin(cookie.stoken, uid, user_id, re)
     result, msg = await get_coin_task.run()
@@ -431,7 +444,9 @@ async def bbs_auto_coin():
         try:
             await get_bot().send_group_msg(group_id=int(group_id), message=msg)
         except Exception as e:
-            logger.info("米游币加强自动获取", "➤➤", {"群": group_id}, f"发送米游币自动结果失败: {e}", False)
+            logger.info("米游币加强自动获取", "➤➤", {
+                        "群": group_id}, f"发送米游币自动结果失败: {e}", False)
         await asyncio.sleep(random.randint(3, 6))
 
-    logger.info("米游币加强自动获取", f"获取完成，共花费<m>{round((time.time() - t) / 60, 2)}</m>分钟")
+    logger.info(
+        "米游币加强自动获取", f"获取完成，共花费<m>{round((time.time() - t) / 60, 2)}</m>分钟")

@@ -12,7 +12,7 @@ from nonebot.rule import to_me
 from nonebot.plugin import PluginMetadata
 
 from LittlePaimon.database import PrivateCookie, MihoyoBBSSub
-from LittlePaimon.utils import logger, NICKNAME, DRIVER
+from LittlePaimon.utils import logger, NICKNAME
 from LittlePaimon.utils.message import CommandUID, CommandSwitch, CommandPlayer
 
 from .static import get_pass_challenge
@@ -22,19 +22,6 @@ from .coin_handle import mhy_bbs_coin, bbs_auto_coin
 from .config import config
 from .sign_handle import sign_in, bbs_auto_sign
 from . import web_page, web_api
-
-
-@DRIVER.on_startup
-async def start():
-    logger.info("人工验证", "➤", "", "请使用pip install flask gevent安装依赖，安装过请忽略", True)
-    logger.info(
-        "人工验证",
-        "➤",
-        "",
-        "在根目录请使用python LittlePaimon\plugins\LittlePaimon-plugin-Abyss\geetest\run.py打开人工验证后端",
-        True,
-    )
-    logger.info("人工验证", "➤", "", f"ip:{config.ip}端口:5000", True)
 
 
 __plugin_meta__ = PluginMetadata(
@@ -218,7 +205,8 @@ async def _(
                     GF += f",\n请前往{config.ip}/validate?uid={uid2}进行手动验证,如果无法访问请刷新,直到出结果"
                 await sr_sign.send(GF, at_sender=True)
                 logger.info(
-                    "加强星铁签到", "➤", {"用户": str(event.user_id), "uid": uid2}, "执行签到", True
+                    "加强星铁签到", "➤", {
+                        "用户": str(event.user_id), "uid": uid2}, "执行签到", True
                 )
                 sr_list.append(f"{event.user_id}-{uid2}")
                 _, result = await sr_sign_in(str(event.user_id), uid2, uid, False)
@@ -306,7 +294,8 @@ async def _(
                     GF += f",\n请前往{config.ip}/validate?uid={uid}进行手动验证,如果无法访问请刷新,直到出结果"
                 await sign.send(GF, at_sender=True)
                 logger.info(
-                    "加强米游社签到", "➤", {"用户": str(event.user_id), "uid": uid}, "执行签到", True
+                    "加强米游社签到", "➤", {
+                        "用户": str(event.user_id), "uid": uid}, "执行签到", True
                 )
                 list.append(f"{event.user_id}-{uid}")
                 _, result = await sign_in(str(event.user_id), uid, False)
@@ -317,7 +306,8 @@ async def _(
             or (event.user_id in config.whlist)
             or (str(event.user_id) in bot.config.superusers)
         ):
-            sub_data = {"user_id": event.user_id, "uid": uid, "sub_event": "米游社验证签到"}
+            sub_data = {"user_id": event.user_id,
+                        "uid": uid, "sub_event": "米游社验证签到"}
             if switch:
                 # switch为开启，则添加订阅
                 if await PrivateCookie.get_or_none(user_id=str(event.user_id), uid=uid):
@@ -437,7 +427,8 @@ async def _(
                     GF += f",\n请前往{config.ip}/validate?uid={uid}进行手动验证,如果无法访问请等待,直到出结果"
                 await get_coin.send(GF, at_sender=True)
                 logger.info(
-                    "加强米游币获取", "➤", {"用户": str(event.user_id), "uid": uid}, "执行获取", True
+                    "加强米游币获取", "➤", {
+                        "用户": str(event.user_id), "uid": uid}, "执行获取", True
                 )
                 list.append(f"{event.user_id}-{uid}")
                 result = await mhy_bbs_coin(str(event.user_id), uid, False)
@@ -448,7 +439,8 @@ async def _(
             or (event.user_id in config.whlist)
             or (str(event.user_id) in bot.config.superusers)
         ):
-            sub_data = {"user_id": event.user_id, "uid": uid, "sub_event": "米游币验证获取"}
+            sub_data = {"user_id": event.user_id,
+                        "uid": uid, "sub_event": "米游币验证获取"}
             if switch:
                 # switch为开启，则添加订阅
                 if (
